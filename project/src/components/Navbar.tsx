@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   HandHelping as Helping, 
   Bell, 
@@ -21,18 +21,32 @@ import {
 } from 'lucide-react';
 
 const Navbar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Close menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsProfileOpen(false);
+  }, [location.pathname]);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const menu = document.getElementById('mobile-menu');
       const button = document.getElementById('menu-button');
+      const profile = document.getElementById('profile-menu');
+      const profileButton = document.getElementById('profile-button');
       
       if (menu && button && !menu.contains(event.target as Node) && !button.contains(event.target as Node)) {
         setIsMenuOpen(false);
+      }
+      
+      if (profile && profileButton && !profile.contains(event.target as Node) && !profileButton.contains(event.target as Node)) {
+        setIsProfileOpen(false);
       }
     };
 
@@ -40,10 +54,11 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close menu when route changes
-  useEffect(() => {
+  const handleNavigation = (path: string) => {
+    navigate(path);
     setIsMenuOpen(false);
-  }, [window.location.pathname]);
+    setIsProfileOpen(false);
+  };
 
   const [userProfile, setUserProfile] = useState({
     name: "John Doe",
@@ -98,30 +113,31 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-red-600 transition-colors">Home</Link>
-            <Link to="/resources" className="text-gray-700 hover:text-red-600 transition-colors">Resources</Link>
-            <Link to="/incidents" className="text-gray-700 hover:text-red-600 transition-colors">Incidents</Link>
-            <Link to="/guidelines" className="text-gray-700 hover:text-red-600 transition-colors">
+            <button onClick={() => handleNavigation('/')} className="text-gray-700 hover:text-red-600 transition-colors">Home</button>
+            <button onClick={() => handleNavigation('/resources')} className="text-gray-700 hover:text-red-600 transition-colors">Resources</button>
+            <button onClick={() => handleNavigation('/incidents')} className="text-gray-700 hover:text-red-600 transition-colors">Incidents</button>
+            <button onClick={() => handleNavigation('/guidelines')} className="text-gray-700 hover:text-red-600 transition-colors">
               <BookOpen className="h-4 w-4 inline-block mr-1" />
               Guidelines
-            </Link>
-            <Link to="/alerts" className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
+            </button>
+            <button onClick={() => handleNavigation('/alerts')} className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
               <Bell className="h-4 w-4 mr-1" />
               Alerts
-            </Link>
+            </button>
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link to="/dashboard" className="hidden md:block text-gray-700 hover:text-red-600 transition-colors">
+            <button onClick={() => handleNavigation('/dashboard')} className="hidden md:block text-gray-700 hover:text-red-600 transition-colors">
               <LayoutDashboard className="h-6 w-6" />
-            </Link>
-            <Link to="/donate" className="hidden md:block text-gray-700 hover:text-red-600 transition-colors">
+            </button>
+            <button onClick={() => handleNavigation('/donate')} className="hidden md:block text-gray-700 hover:text-red-600 transition-colors">
               <DollarSign className="h-6 w-6" />
-            </Link>
-            <Link to="/login" className="text-gray-700 hover:text-red-600 transition-colors">Login</Link>
-            <Link to="/signup" className="text-gray-700 hover:text-red-600 transition-colors">Signup</Link>
+            </button>
+            <button onClick={() => handleNavigation('/login')} className="text-gray-700 hover:text-red-600 transition-colors">Login</button>
+            <button onClick={() => handleNavigation('/signup')} className="text-gray-700 hover:text-red-600 transition-colors">Signup</button>
             <div className="relative">
               <button
+                id="profile-button"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center text-gray-700 hover:text-red-600 transition-colors"
               >
@@ -129,7 +145,7 @@ const Navbar = () => {
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
+                <div id="profile-menu" className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
                   <div className="flex justify-between items-center px-4 py-2 border-b">
                     <h3 className="text-lg font-semibold text-gray-900">Profile</h3>
                     <button 
@@ -267,62 +283,60 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu with smooth animation */}
-      <div
-        id="mobile-menu"
-        className={`md:hidden transition-all duration-300 ease-in-out transform ${
-          isMenuOpen
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-full hidden'
-        }`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg rounded-b-lg">
-          <Link 
-            to="/" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Home
-          </Link>
-          <Link 
-            to="/resources" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Resources
-          </Link>
-          <Link 
-            to="/incidents" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Incidents
-          </Link>
-          <Link 
-            to="/guidelines" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Guidelines
-          </Link>
-          <Link 
-            to="/alerts" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Alerts
-          </Link>
-          <Link 
-            to="/dashboard" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/donate" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            Donate
-          </Link>
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div
+          id="mobile-menu"
+          className="md:hidden transition-all duration-300 ease-in-out transform"
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg rounded-b-lg">
+            <button 
+              onClick={() => handleNavigation('/')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => handleNavigation('/resources')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Resources
+            </button>
+            <button 
+              onClick={() => handleNavigation('/incidents')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Incidents
+            </button>
+            <button 
+              onClick={() => handleNavigation('/guidelines')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Guidelines
+            </button>
+            <button 
+              onClick={() => handleNavigation('/alerts')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Alerts
+            </button>
+            <button 
+              onClick={() => handleNavigation('/dashboard')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={() => handleNavigation('/donate')}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 transition-colors duration-200"
+            >
+              Donate
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
-}
+};
 
 export default Navbar;

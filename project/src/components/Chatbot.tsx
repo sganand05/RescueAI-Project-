@@ -30,6 +30,33 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
+  const analyzeAndNavigate = (input: string) => {
+    const lowercaseInput = input.toLowerCase();
+    
+    // Define navigation patterns
+    const navigationPatterns = [
+      { keywords: ['report', 'emergency', 'help', 'incident'], path: '/report' },
+      { keywords: ['donate', 'contribution', 'give'], path: '/donate' },
+      { keywords: ['resource', 'supplies', 'need', 'request'], path: '/resources' },
+      { keywords: ['guide', 'instruction', 'how to'], path: '/guidelines' },
+      { keywords: ['alert', 'warning', 'weather'], path: '/alerts' },
+      { keywords: ['incident', 'event', 'situation'], path: '/incidents' },
+      { keywords: ['dashboard', 'status', 'overview'], path: '/dashboard' }
+    ];
+
+    // Check for matches
+    for (const pattern of navigationPatterns) {
+      if (pattern.keywords.some(keyword => lowercaseInput.includes(keyword))) {
+        setTimeout(() => {
+          navigate(pattern.path);
+          setIsOpen(false);
+        }, 1500); // Delay navigation to allow user to read bot response
+        return true;
+      }
+    }
+    return false;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -38,8 +65,19 @@ const Chatbot = () => {
     const userMessage = { text: input, isBot: false };
     setMessages(prev => [...prev, userMessage]);
 
+    // Check for navigation intent
+    const shouldNavigate = analyzeAndNavigate(input);
+
     // Generate bot response
     const responses = generateResponse(input);
+    
+    // Add navigation suggestion if applicable
+    if (shouldNavigate) {
+      responses.push({
+        text: "I'll redirect you to the appropriate page...",
+        type: 'instruction'
+      });
+    }
     
     // Add each response with a delay
     responses.forEach((response, index) => {
@@ -75,14 +113,14 @@ const Chatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-red-600 text-white p-4 rounded-full shadow-lg hover:bg-red-700 transition-all transform hover:scale-110"
+          className="fixed bottom-6 right-6 bg-red-600 text-white p-4 rounded-full shadow-lg hover:bg-red-700 transition-all transform hover:scale-110 z-[9999]"
         >
           <Bot className="h-6 w-6" />
         </button>
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-xl border border-gray-200">
+        <div className="fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]">
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center">
               <Bot className="h-6 w-6 text-red-600 mr-2" />
